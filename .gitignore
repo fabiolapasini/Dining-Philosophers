@@ -1,1 +1,4 @@
 /Python/notebook/
+/Rust/dining_philosophers/target/
+/Rust/dining_philosophers/Cargo.lock
+/Rust/dining_philosophers/Cargo.toml
