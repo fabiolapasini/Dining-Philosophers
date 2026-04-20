@@ -31,7 +31,7 @@ def right(i):
     return (i + 1) % N
 
 # check if neighbors are eating and wake up
-def test(i):
+def can_i_eat(i):
     # if neighbors are not eating, grant permission to eat
     if state[i] == State.HUNGRY and state[left(i)] != State.EATING and state[right(i)] != State.EATING:
         state[i] = State.EATING
@@ -49,8 +49,8 @@ def take_forks(i):
         state[i] = State.HUNGRY
         with output_mtx:
             print(f"{i:>20} is HUNGRY")
-        test(i) 
-    # Blocks if test(i) didn't release and didn't change state to EATING 
+        can_i_eat(i) 
+    # Blocks if can_i_eat(i) didn't release and didn't change state to EATING 
     both_forks_available[i].acquire()
 
 def eat(i):
@@ -65,8 +65,8 @@ def put_forks(i):
         state[i] = State.THINKING
         # Check if neighbors can eat now that I'm done
         # I release neighbors if they are hungry
-        test(left(i))
-        test(right(i))
+        can_i_eat(left(i))
+        can_i_eat(right(i))
 
 
 def philosopher(i):
@@ -80,11 +80,15 @@ def philosopher(i):
 if __name__ == "__main__":
     print("Dining Philosophers Solution")
 
-    threads = []
+    '''threads = []
     for i in range(N):
         t = threading.Thread(target=philosopher, args=(i,))
         t.daemon = True # Allows script to exit on Ctrl+C
         threads.append(t)
+        t.start()'''
+
+    threads = [threading.Thread(target=philosopher, args=(i,), daemon=True) for i in range(N)]
+    for t in threads:
         t.start()
     
     # Keep main thread alive
