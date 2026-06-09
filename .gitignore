@@ -5,8 +5,8 @@
 /Rust/dining_philosophers/target/
 /Rust/dining_philosophers/Cargo.lock
 
-/C++/Algorithm/dining_philosophers/NoSemaphore/.vs/
-/C++/Algorithm/dining_philosophers/Semaphore/.vs/
+/C++/Algorithm/NoSemaphore/.vs/
+/C++/Algorithm/Semaphore/.vs/
 
-/C++/Algorithm/dining_philosophers/NoSemaphore/out/
-/C++/Algorithm/dining_philosophers/Semaphore/out/
+/C++/Algorithm/NoSemaphore/out/
+/C++/Algorithm/Semaphore/out/
