@@ -4,6 +4,7 @@
 #include <vector>
 #include <chrono>
 #include <random>
+#include <queue>
 
 static const int N = 5;
 static const int NUM_OF_MEAL = 4;
@@ -14,7 +15,14 @@ public:
 
 	void acquire() {
 		std::unique_lock<std::mutex> lock(mtx);
-		cv.wait(lock, [&] { return count > 0; });
+		
+		auto cv = std::make_shared<std::condition_variable>();
+		queue.push(cv);
+		cv->wait(lock, [&] {
+			return queue.front() == cv && count > 0;
+			});
+		queue.pop();
+
 		--count;
 	}
 
@@ -22,13 +30,13 @@ public:
 		std::unique_lock<std::mutex> lock(mtx);
 		++count;
 
-		// can cause starvation: notify one of many, one can wait for long
-		cv.notify_one();	
+		if (!queue.empty())
+			queue.front()->notify_one();
 	}
 
 private:
 	std::mutex mtx;
-	std::condition_variable cv;
+	std::queue<std::shared_ptr<std::condition_variable>> queue;
 	int count;
 };
 
@@ -74,7 +82,7 @@ private:
 	std::unique_lock<std::mutex> lk_left;
 	std::unique_lock<std::mutex> lk_right;
 
-	// avoid rece condition and local for each philosopher
+	// avoid race condition on random generation: each philosopher has its own random-num-genration
 	std::mt19937 rng;
 	std::uniform_int_distribution<int> dist;
 
