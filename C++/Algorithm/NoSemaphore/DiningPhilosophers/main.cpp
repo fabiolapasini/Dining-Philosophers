@@ -3,8 +3,7 @@
 #include <mutex>
 #include <vector>
 #include <chrono>
-#include <cstdlib>
-#include <ctime>
+#include <random>
 
 static const int N = 5;
 static const int NUM_OF_MEAL = 4;
@@ -25,7 +24,9 @@ class Philosopher
 {
 public:
 	Philosopher(int i, Fork& l, Fork& r)
-		: index(i), left(l), right(r) {}
+		: index(i), left(l), right(r), 
+		rng(std::random_device{}()), dist(100, 200)  
+	{}
 
 	void run(){
 		for (int i = 0; i < NUM_OF_MEAL; i++){
@@ -39,13 +40,23 @@ public:
 
 private:
 	int index;
-	Fork& left;		// reference: cannot copy a mutex!
+
+	// reference: cannot copy a mutex!
+	Fork& left;		
 	Fork& right;
+
+	// release mutex if excetion occurs in eat()
+	std::unique_lock<std::mutex> lk_left;
+	std::unique_lock<std::mutex> lk_right;
+
+	// avoid rece condition and local for each philosopher
+	std::mt19937 rng;
+	std::uniform_int_distribution<int> dist;
 
 	void think(){
 		print("is thinking");
-		int time = 100 + (std::rand() % 100);
-		std::this_thread::sleep_for(std::chrono::milliseconds(time));
+		int duration = dist(rng);
+		std::this_thread::sleep_for(std::chrono::milliseconds(duration));
 
 	}
 
@@ -56,28 +67,28 @@ private:
 	void pick_up_forks(){
 		// avoid deadlock!
 		if (index % 2 == 0) {
-			left.mtx.lock();
+			lk_left = std::unique_lock<std::mutex>(left.mtx);
 			print("took left fork");
-			right.mtx.lock();
+			lk_right = std::unique_lock<std::mutex>(right.mtx);
 			print("took right fork");
 		}
 		else{
-			right.mtx.lock();
+			lk_right = std::unique_lock<std::mutex>(right.mtx);
 			print("took right fork");
-			left.mtx.lock();
+			lk_left = std::unique_lock<std::mutex>(left.mtx);
 			print("took left fork");
 		}
 	}
 
 	void eat(){
 		print("is eating");
-		int time = 100 + (std::rand() % 100);
-		std::this_thread::sleep_for(std::chrono::milliseconds(time));
+		int duration = dist(rng);
+		std::this_thread::sleep_for(std::chrono::milliseconds(duration));
 	}
 
 	void put_down_forks(){
-		left.mtx.unlock();
-		right.mtx.unlock();
+		lk_left.unlock();
+		lk_right.unlock();
 		print("put down forks");
 	}
 
@@ -92,8 +103,6 @@ private:
 
 int main()
 {
-	std::srand((unsigned)std::time(nullptr));
-
 	std::vector <Philosopher> phils;
 
 	/*
@@ -108,7 +117,7 @@ int main()
 
 	for (int i = 0; i < N; i++){
 		phils.emplace_back(
-			Philosopher( i, forks[i], forks[(i + 1)%N] )
+			Philosopher( i, forks[i], forks[(i + 1)%N])
 		);
 	}
 
