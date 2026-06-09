@@ -2,3 +2,10 @@
 /Rust/dining_philosophers/target/
 /Rust/dining_philosophers/Cargo.lock
 /Rust/dining_philosophers/Cargo.toml
+
+/C++/Algorithm/dining_philosophers/NoSemaphore/.vs
+/C++/Algorithm/dining_philosophers/NoSemaphore/out
+
+/C++/Algorithm/dining_philosophers/Semaphore/.vs
+/C++/Algorithm/dining_philosophers/Semaphore/out
+
