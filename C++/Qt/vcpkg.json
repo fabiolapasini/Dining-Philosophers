@@ -1,0 +1,14 @@
+{
+  "dependencies": [
+    "qtbase",
+    "nlohmann-json"
+  ],
+  "features": {
+    "tests": {
+      "description": "Builds tests",
+      "dependencies": [
+        "gtest"
+      ]
+    }
+  }
+}
