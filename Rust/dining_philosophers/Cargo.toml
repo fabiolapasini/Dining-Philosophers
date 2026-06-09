@@ -1,0 +1,12 @@
+[package]
+name = "dining_philosophers"
+version = "0.1.0"
+edition = "2024"
+
+[[bin]]
+name = "dining_philosophers"
+path = "src/dining_philosophers.rs"
+
+[dependencies]
+parking_lot = "0.12"
+rand = "0.8"
